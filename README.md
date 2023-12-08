@@ -1,1 +1,1 @@
-# matlab-ab-class
+# 注意瞬脱 / Attentional Blink, AB
