@@ -1,159 +1,207 @@
-% 初始化Psychtoolbox
+% 注意瞬脱实验程序
+% 作者：Bing
+% 日期：2023年12月11日
+% 说明：这是一个简单的注意瞬脱实验程序，使用Psychtoolbox-3来呈现刺激和收集反应。
+%       请根据你的需要和偏好修改参数和设置。
+
+% 清除工作空间和命令窗口
 clear;
 clc;
-PsychDefaultSetup(2); % 设置默认参数
-AssertOpenGL; % 检查 Psychtoolbox 是否正常运行
-Screen('Preference', 'VisualDebugLevel', 0); % 跳过青蛙画面（0）
-Screen('Preference', 'SkipSyncTests', 1); % 跳过同步测试（1）
-screenNumber = max(Screen('Screens')); % 获取屏幕编号
-white = WhiteIndex(screenNumber); % 定义白色
-black = BlackIndex(screenNumber); % 定义黑色
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, black); % 打开一个窗口
-[xCenter, yCenter] = RectCenter(windowRect); % 获取中心坐标
-[screenXpixels, screenYpixels] = Screen('WindowSize', window); % 获取屏幕尺寸
-ifi = Screen('GetFlipInterval', window); % 获取每帧间隔
-topPriorityLevel = MaxPriority(window); % 获取最高优先级
-HideCursor; % 隐藏光标
-Screen('TextFont', window, 'SimHei'); % 设置字体
-KbName('UnifyKeyNames'); % 统一键盘名称
 
-% 定义刺激列表
-StimulusList = {
-    ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'];... % 字母刺激
-    ['3', '4', '5', '6', '7', '9']}; % 数字刺激
+% 设置随机数种子
+rng('shuffle');
 
-% 定义实验参数
-nBlocks = 4; % block数-4
-nTrials = 40; % 每个block的试次数-40
-nDigits = 20; % 每个试次的数字数-20
-nLetters = 2; % 每个试次的字母数-2
-T1Position = [3, 5, 7, 9, 11]; % T1可能出现的位置
-T2LagPosition = 1:8; % T2相对T1的延迟位置
-stimulusDuration = 0.1; % 每个刺激的持续时间，单位秒
-isi = 0.05; % 刺激间隔，单位秒
-fixationDuration = 1; % 注视点的持续时间，单位秒
-feedbackDuration = 0.5; % 反馈的持续时间，单位秒
-Screen('TextSize', window, 32);
-textColor = white; % 文字颜色
-fixationSize = 20; % 注视点大小，单位像素
-fixationColor = white; % 注视点颜色
-feedbackColor = white; % 反馈颜色
-responseKeys = {'1!', '2@', '3#', '4$', '5%', '6^', '7&', '8*', '9(', '0)', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'ESCAPE'}; % 可能的反应键
-escapeKey = KbName('ESCAPE'); % 退出键，用于中止实验
+% 设置实验参数
+nLetters = 2; % 字母的数量
+nNumbers = 20; % 数字的数量
+nStimuli = nLetters + nNumbers; % 刺激的总数量
+letterPosRange = [5, 9]; % 第一个字母的位置范围
+letterDistRange = [1, 8]; % 第二个字母与第一个字母的相对距离范围
+nTrialsPerCond = 4; % 每个条件的试次数量
+nBlocks = 4; % block的数量
+nTrialsPerBlock = nTrialsPerCond * prod(letterPosRange) * prod(letterDistRange); % 每个block的试次数量
+nTrials = nTrialsPerBlock * nBlocks; % 实验的总试次数量
+stimulusDuration = 0.1; % 刺激呈现的持续时间（秒）
+isi = 0.05; % 刺激之间的间隔时间（秒）
+iti = 1; % 试次之间的间隔时间（秒）
+blockBreak = 10; % block之间的休息时间（秒）
+screenNumber = max(Screen('Screens')); % 使用的屏幕编号
+screenColor = [128, 128, 128]; % 屏幕的背景颜色（RGB值）
+textColor = [0, 0, 0]; % 文本的颜色（RGB值）
+textFont = 'Arial'; % 文本的字体
+textSize = 32; % 文本的大小（像素）
+textWrap = 60; % 文本的换行长度（字符数）
+stimulusSize = 64; % 刺激的大小（像素）
+stimulusColor = [255, 255, 255]; % 刺激的颜色（RGB值）
+stimulusFont = 'Courier New'; % 刺激的字体
+stimulusX = 0; % 刺激的水平位置（相对于屏幕中心，像素）
+stimulusY = 0; % 刺激的垂直位置（相对于屏幕中心，像素）
+responseKeys = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', ...
+    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', ...
+    'U', 'V', 'W', 'X', 'Y', 'Z'}; % 可用的反应键
+responseTimeout = 5; % 反应的超时时间（秒）
+feedbackDuration = 0.5; % 反馈的持续时间（秒）
+feedbackColor = [0, 255, 0; 255, 0, 0]; % 反馈的颜色（RGB值），第一行为正确，第二行为错误
+dataFile = 'data.mat'; % 保存数据的文件名（.mat格式）
+csvFile = 'data.csv'; % 保存数据的文件名（.csv格式）
 
-% 定义指导语
-instructions = '你将会看到一系列快速变换的数字，其中会夹杂两个字母，你需要在看完这些数字和字母后，尽量准确地报告你看到的字母分别是什么。\n\n请按空格键开始。';
-endText = '实验结束，谢谢你的参与！';
+% 生成刺激
+letters = 'A':'Z'; % 可用的字母
+numbers = '0':'9'; % 可用的数字
+stimuli = cell(nTrials, nStimuli); % 刺激的矩阵，每行为一个试次，每列为一个刺激
+letterPos = zeros(nTrials, nLetters); % 字母的位置，每行为一个试次，每列为一个字母
+letterDist = zeros(nTrials, nLetters - 1); % 字母之间的距离，每行为一个试次，每列为一个距离
+for i = 1:nTrials
+    % 随机选择第一个字母的位置
+    letterPos(i, 1) = randi(letterPosRange);
+    % 随机选择第二个字母与第一个字母的相对距离
+    letterDist(i, 1) = randi(letterDistRange);
+    % 计算第二个字母的位置
+    letterPos(i, 2) = letterPos(i, 1) + letterDist(i, 1);
+    % 随机选择两个字母
+    stimuli(i, letterPos(i, :)) = datasample(letters, nLetters, 'Replace', false);
+    % 随机选择二十个数字
+    stimuli(i, setdiff(1:nStimuli, letterPos(i, :))) = datasample(numbers, nNumbers, 'Replace', true);
+end
 
-% 预分配结果矩阵
-results = zeros(nBlocks, nTrials, 4); % 列：T1位置，T2延迟位置，T1正确率，T2正确率
+% 打乱试次顺序
+trialOrder = Shuffle(1:nTrials);
 
-% 显示指导语
-DrawFormattedText(window, double(instructions), 'center', 'center', textColor); % 在屏幕中央绘制指导语
-Screen('Flip', window); % 更新屏幕
-KbStrokeWait; % 等待按键
+% 初始化数据
+data = struct();
+data.trial = trialOrder; % 试次编号
+data.letterPos = letterPos(trialOrder, :); % 字母的位置
+data.letterDist = letterDist(trialOrder, :); % 字母之间的距离
+data.stimuli = stimuli(trialOrder, :); % 刺激
+data.response = cell(nTrials, nLetters); % 反应
+data.correct = zeros(nTrials, nLetters); % 正确性
+data.rt = zeros(nTrials, nLetters); % 反应时
 
-% 开始实验循环
+% 初始化屏幕
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber, screenColor);
+[xCenter, yCenter] = RectCenter(windowRect);
+Screen('TextFont', window, textFont);
+Screen('TextSize', window, textSize);
+Screen('TextColor', window, textColor);
+
+% 初始化键盘
+KbName('UnifyKeyNames');
+responseKeyCodes = KbName(responseKeys);
+escapeKey = KbName('ESCAPE');
+RestrictKeysForKbCheck([responseKeyCodes, escapeKey]);
+
+% 初始化声音
+InitializePsychSound;
+pahandle = PsychPortAudio('Open', [], [], 0, [], 1);
+beep = MakeBeep(500, 0.1);
+PsychPortAudio('FillBuffer', pahandle, beep);
+
+% 显示欢迎语
+welcomeText = '欢迎参加注意瞬脱实验！\n\n在这个实验中，你将看到一系列快速变换的数字和字母，其中有两个字母，二十个数字。\n\n你的任务是尽量准确地报告你看到的两个字母分别是什么。\n\n请按照出现的顺序，使用键盘上的字母键输入你的反应。\n\n如果你没有看到字母，或者不确定，可以随便猜一个。\n\n你有5秒的时间输入你的反应，如果超时，你将听到一声提示音。\n\n每输入一个字母，你将看到一个反馈，绿色表示正确，红色表示错误。\n\n这个实验分为4个block进行，每个block有40个试次，完成一个block之后，你可以休息一会儿。\n\n如果你准备好了，请按任意键开始实验。';
+DrawFormattedText(window, welcomeText, 'center', 'center', textColor, textWrap);
+Screen('Flip', window);
+KbStrokeWait;
+
+% 开始实验
 for block = 1:nBlocks
-    Screen('TextSize', window, 128);
-    % 随机打乱试次顺序
-    trialOrder = Shuffle(1:nTrials);
-    % 开始block循环
-    for trial = trialOrder
-        % 随机选择T1位置
-        T1pos = T1Position(randi(length(T1Position)));
-        % 随机选择T2延迟位置
-        T2lag = T2LagPosition(randi(length(T2LagPosition)));
-        % 随机选择T1字母
-        T1 = StimulusList{1}(randi(length(StimulusList{1})));
-        % 随机选择T2字母
-        T2 = StimulusList{1}(randi(length(StimulusList{1})));
-        % 确保T1和T2不相同
-        while T2 == T1
-            T2 = StimulusList{1}(randi(length(StimulusList{1})));
-        end
-        % 随机选择数字
-        digits = StimulusList{2}(randi(length(StimulusList{2}), 1, nDigits));
-        % 将字母插入数字中
-        digits(T1pos) = T1;
-        digits(T1pos + T2lag) = T2;
-        % 将数字转换为单元数组
-        stimuli = cellstr(digits');
-        % 显示注视点
-        DrawFormattedText(window, '+', xCenter, yCenter, fixationColor, [], [], [], [], []); % 在屏幕中央绘制注视点
-        vbl = Screen('Flip', window); % 更新屏幕
-        % 等待注视点持续时间
-        WaitSecs(fixationDuration);
-        % 开始刺激循环
-        for i = 1:nDigits
-            % 绘制刺激
-            DrawFormattedText(window, stimuli{i}, 'center', 'center', textColor, [], [], [], [], [], []); % 在屏幕中央绘制刺激
-            % 更新屏幕
-            vbl = Screen('Flip', window, vbl + (stimulusDuration - 0.5 * ifi)); % 在刺激持续时间结束后更新屏幕
-            % 等待刺激间隔
+    % 显示block编号
+    blockText = sprintf('第%d个block，按任意键开始', block);
+    DrawFormattedText(window, blockText, 'center', 'center', textColor, textWrap);
+    Screen('Flip', window);
+    KbStrokeWait;
+    
+    % 显示试次编号
+    for trial = 1:nTrialsPerBlock
+        % 显示试次编号
+        trialText = sprintf('第%d个block，第%d个试次，按任意键开始', block, trial);
+        DrawFormattedText(window, trialText, 'center', 'center', textColor, textWrap);
+        Screen('Flip', window);
+        KbStrokeWait;
+        
+        % 显示刺激
+        for stimulus = 1:nStimuli
+            DrawFormattedText(window, data.stimuli{trial, stimulus}, stimulusX, stimulusY, stimulusColor, [], [], [], [], [], [stimulusX, stimulusY, stimulusX, stimulusY]);
+            Screen('Flip', window);
+            WaitSecs(stimulusDuration);
+            Screen('Flip', window);
             WaitSecs(isi);
         end
-        % 清空屏幕
+        
+        % 显示反应提示
+        responseText = '请输入你看到的两个字母，按回车键结束';
+        DrawFormattedText(window, responseText, 'center', 'center', textColor, textWrap);
         Screen('Flip', window);
-        % 获取用户反应
-        respT1 = [];
-        respT2 = [];
-        while isempty(respT1) || isempty(respT2) % 当用户没有反应完两个字母时
-            % 检查键盘
-            [keyIsDown, secs, keyCode] = KbCheck;
-            % 如果用户按下了键
-            if keyIsDown
-                % 获取键名
-                keyName = KbName(keyCode);
-                % 如果用户按下了退出键，中止实验
-                if isequal(keyName, escapeKey)
-                    sca;
-                    return;
+        
+        % 收集反应
+        for letter = 1:nLetters
+            % 等待反应
+            responseStart = GetSecs;
+            while true
+                [keyIsDown, responseEnd, keyCode] = KbCheck;
+                if keyIsDown
+                    break;
                 end
-                % 如果用户按下了有效键，记录反应
-                if ismember(keyName, responseKeys)
-                    % 如果用户还没有反应T1，记录T1反应
-                    if isempty(respT1)
-                        respT1 = keyName;
-                    % 如果用户还没有反应T2，记录T2反应
-                    elseif isempty(respT2)
-                        respT2 = keyName;
-                    end
+                if responseEnd - responseStart > responseTimeout
+                    break;
                 end
             end
+            
+            % 处理反应
+            if keyIsDown
+                % 记录反应
+                data.response{trial, letter} = KbName(keyCode);
+                data.rt(trial, letter) = responseEnd - responseStart;
+                % 显示反馈
+                if strcmp(data.response{trial, letter}, data.stimuli{trial, data.letterPos(trial, letter)})
+                    data.correct(trial, letter) = 1;
+                    DrawFormattedText(window, data.response{trial, letter}, 'center', 'center', feedbackColor(1, :), textWrap);
+                else
+                    data.correct(trial, letter) = 0;
+                    DrawFormattedText(window, data.response{trial, letter}, 'center', 'center', feedbackColor(2, :), textWrap);
+                end
+                Screen('Flip', window);
+                WaitSecs(feedbackDuration);
+            else
+                % 播放提示音
+                PsychPortAudio('Start', pahandle);
+                % 显示反馈
+                DrawFormattedText(window, '?', 'center', 'center', feedbackColor(2, :), textWrap);
+                Screen('Flip', window);
+                WaitSecs(feedbackDuration);
+            end
         end
-        % 检查反应的正确性
-        accT1 = strcmp(respT1, T1);
-        accT2 = strcmp(respT2, T2);
-        % 给用户反馈
-        if accT1 && accT2
-            feedback = '正确';
-        else
-            feedback = '错误';
+
+        % 显示休息提示
+        if trial < nTrialsPerBlock
+            breakText = sprintf('第%d个block，第%d个试次，休息一下，按任意键继续', block, trial);
+            DrawFormattedText(window, breakText, 'center', 'center', textColor, textWrap);
+            Screen('Flip', window);
+            KbStrokeWait;
         end
-        % 显示反馈
-        DrawFormattedText(window, double(feedback), 'center', 'center', feedbackColor);
-        Screen('Flip', window);
-        % 等待反馈持续时间
-        WaitSecs(feedbackDuration);
-        % 保存结果
-        results(block, trial, :) = [T1pos, T2lag, accT1, accT2];
     end
-    % 显示休息信息
-    Screen('TextSize', window, 64);
+
+    % 显示block休息
     if block < nBlocks
-        breakText = sprintf('你已经完成了第%d个block，请休息一下。\n\n请按空格键继续。', block);
-        DrawFormattedText(window, double(breakText), 'center', 'center', textColor);
+        breakText = sprintf('第%d个block，休息一下，按任意键继续', block);
+        DrawFormattedText(window, breakText, 'center', 'center', textColor, textWrap);
         Screen('Flip', window);
         KbStrokeWait;
     end
 end
 
+% 保存数据
+save(dataFile, 'data');
+dataTable = struct2table(data);
+writetable(dataTable, csvFile);
+
 % 显示结束语
-Screen('TextSize', window, 64);
-DrawFormattedText(window, double(endText), 'center', 'center', textColor);
+endText = '实验结束，谢谢参加！';
+DrawFormattedText(window, endText, 'center', 'center', textColor, textWrap);
 Screen('Flip', window);
 KbStrokeWait;
 
-% 关闭屏幕并退出
+% 清理环境
+PsychPortAudio('Close', pahandle);
+RestrictKeysForKbCheck([]);
+Screen('CloseAll');
 sca;
