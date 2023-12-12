@@ -7,6 +7,24 @@
 % 因变量：T1正确率，T2正确率
 clear;
 clc;
+%% 定义实验参数
+ESC = 0;% 是否退出
+TrailPerSituation = 1;% 每个条件的试次(要求是4次！！！！！！！！！！！)
+FeedBackTime = 1;% 反馈呈现时间
+TrailWaitTime = 1;% 试次间隔时间
+LetterInputTime = 0.4;% 字母输入后的延迟时间（绝对不能设为0）
+StimulusTime = 0.1;% 单个刺激呈现时间（要求是0.1s）
+DEBUG = 1;% 等于1时始终保存数据（就算退出）
+FontSizeCN = 40;% 提示语字号
+FontSizeStimulus = 120;% 刺激字号
+FontSizeCross = 80;% 试次间隔注视点字号
+OriFileName = 'OriginalData';% 原始数据保存文件名
+CalFileName = 'CalculatedData';% 处理后数据保存文件名
+
+
+
+
+
 %% 定义实验设计矩阵
 dataOri = struct("TrialNumber", [], "T1Position", [], "T2LagPosition", [],...
     "T1Target", [], "T2Target", [], "T1Response", [], "T2Response", [], "T1Correct", [], "T2Correct", []);
@@ -15,11 +33,6 @@ dataCal = struct( "Time", [], "Gender", [], "Age", [],...
     "T1Accuracy_Lag3", [], "T2Accuracy_Lag3", [], "T1Accuracy_Lag4", [], "T2Accuracy_Lag4", [],...
     "T1Accuracy_Lag5", [], "T2Accuracy_Lag5", [], "T1Accuracy_Lag6", [], "T2Accuracy_Lag6", [],...
     "T1Accuracy_Lag7", [], "T2Accuracy_Lag7", [], "T1Accuracy_Lag8", [], "T2Accuracy_Lag8", []);
-%% 定义实验参数
-ESC = 0;% 是否退出
-TrailPerSituation = 4;% 每个条件的试次
-FeedBackTime = 1;% 反馈呈现时间
-TrailWaitTime = 1;% 试次间隔时间
 % 刺激物序列
 StimulusLetter = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'];
 StimulusNumber = ['3', '4', '5', '6', '7', '9'];
@@ -44,6 +57,12 @@ Stimulus = char(zeros(40*TrailPerSituation,22));
 for i = 1:40*TrailPerSituation 
     for j = 1:22
         Stimulus(i,j) = StimulusNumber(randi(length(StimulusNumber)));
+        % 让前后数字不重复
+        if j > 1
+            while Stimulus(i,j) == Stimulus(i,j-1)
+                Stimulus(i,j) = StimulusNumber(randi(length(StimulusNumber)));
+            end
+        end
     end
 end
 % 再确定两个字母的位置
@@ -119,7 +138,7 @@ escapeKey = KbName('ESCAPE'); % 定义退出键
 HideCursor;% 隐藏鼠标
 
 %% 显示提示和指导语
-Screen('TextSize', window, 40); % 设置字号
+Screen('TextSize', window, FontSizeCN); % 设置字号
 DrawFormattedText(window,double(suggestion),'center','center',[0 0 0]);
 Screen('Flip', window);
 WaitSecs(3); % 等待x秒钟
@@ -133,11 +152,14 @@ for block = 1:4
         break;
     end
     for i = ((block-1)*10*TrailPerSituation + 1):block*10*TrailPerSituation
+        % 在屏幕上呈现刺激
+        Screen('TextSize', window, FontSizeStimulus);
         for j = 1:22
             DrawFormattedText(window,char(Stimulus(i,j)),'center','center',[0 0 0]);
             Screen('Flip', window); % 更新屏幕
-            WaitSecs(0.1); % 等待0.1秒钟
+            WaitSecs(StimulusTime); % 等待0.1秒钟
         end
+        Screen('TextSize', window, FontSizeCN);
 
         % 等待被试输入第一个字母
         DrawFormattedText(window,double('请按你看到的第一个字母'),'center','center',[0 0 0]);
@@ -155,11 +177,12 @@ for block = 1:4
         else
             dataOri(i).T1Correct = 0;
         end
+        dataOri(i).T1Response = upper(KbName(find(keyCode)));
 
         % 别让下面的程序读到上面的按键
         DrawFormattedText(window, double('请稍等'),'center','center',[0 0 0]);
         Screen('Flip', window);
-        WaitSecs(1);
+        WaitSecs(LetterInputTime);
 
         % 等待被试输入第二个字母
         DrawFormattedText(window,double('请按你看到的第二个字母'),'center','center',[0 0 0]);
@@ -177,6 +200,12 @@ for block = 1:4
         else
             dataOri(i).T2Correct = 0;
         end
+        dataOri(i).T2Response = upper(KbName(find(keyCode)));
+
+        % 为了保持一致性，这里也加上等待
+        DrawFormattedText(window, double('请稍等'),'center','center',[0 0 0]);
+        Screen('Flip', window);
+        WaitSecs(LetterInputTime);
 
         % 显示正确错误反馈
         if (dataOri(i).T1Correct == 1) && (dataOri(i).T2Correct == 1)
@@ -186,14 +215,16 @@ for block = 1:4
             DrawFormattedText(window,double('部分正确'),'center','center',[0 0 0]);
             Screen('Flip', window); % 更新屏幕
         else
-            DrawFormattedText(window,double('错误'),'center','center',[0 0 0]);
+            DrawFormattedText(window,double('全部错误'),'center','center',[0 0 0]);
             Screen('Flip', window); % 更新屏幕
         end
         WaitSecs(FeedBackTime);
 
         % 在屏幕上呈现背景，表示试次间隔
+        Screen('TextSize', window, FontSizeCross);
         DrawFormattedText(window, '+','center','center',[0 0 0]);
         Screen('Flip', window); % 更新屏幕
+        Screen('TextSize', window, FontSizeCN);
         WaitSecs(TrailWaitTime);
     end
 
@@ -214,6 +245,25 @@ KbStrokeWait; % 等待按键继续
 ShowCursor;% 显示鼠标
 sca; % 关闭所有窗口和声音设备，恢复正常屏幕状态
 
-%% 数据分析和保存
+%% 原始数据保存
+if ESC == 0 || DEBUG == 1
+    save([OriFileName '.mat'], 'dataOri'); % 保存数据为.mat
+    % 将结构体转换为表格
+    dataOriTable = struct2table(dataOri);
+    % 将表格保存为.scv
+    writetable(dataOriTable, [OriFileName '.csv'], 'Encoding', 'UTF-8');
+end
+
+%% 数据处理
 
 
+
+
+%% 处理后数据保存
+if ESC == 0 || DEBUG == 1
+    save([CalFileName '.mat'], 'dataCal'); % 保存数据为.mat
+    % 将结构体转换为表格
+    dataCalTable = struct2table(dataCal);
+    % 将表格保存为.scv
+    writetable(dataCalTable, [CalFileName '.csv'], 'Encoding', 'UTF-8');
+end
