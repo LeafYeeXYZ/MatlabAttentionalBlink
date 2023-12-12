@@ -2,8 +2,8 @@
 % 清除现有变量
 clear;
 % 时间
-FeedBackTime = 1;% 反馈呈现时间
-TrailWaitTime = 1;% 试次间隔时间
+FeedBackTime = 1;% 正误反馈呈现时间
+TrailWaitTime = 1;% 试次间隔时间（注视点呈现时间）
 LetterInputTime = 0.4;% 字母输入后的延迟时间（绝对不能设为0）
 StimulusTime = 0.1;% 单个刺激呈现时间（要求是0.1s）
 % 字号
@@ -263,15 +263,74 @@ if ESC == 0 || DEBUG == 1
 end
 
 %% 数据处理
+dataCal.Time = string(datetime('now','Format','yyMMddHHmmss'));
+dataCal.Gender = input('请输入您的性别(女性请输入0/男性请输入1):');
+dataCal.Age = input('请输入您的当前年龄(18/19/20/...):');
+T1L1 = 0;T1L2 = 0;T1L3 = 0;T1L4 = 0;T1L5 = 0;T1L6 = 0;T1L7 = 0;T1L8 = 0;
+T2L1 = 0;T2L2 = 0;T2L3 = 0;T2L4 = 0;T2L5 = 0;T2L6 = 0;T2L7 = 0;T2L8 = 0;
+for i = 1:40*TrailPerSituation
+    if dataOri(i).T1Correct == 1
+        if dataOri(i).T2LagPosition == 1
+            T1L1 = T1L1 + 1;
+        elseif dataOri(i).T2LagPosition == 2
+            T1L2 = T1L2 + 1;
+        elseif dataOri(i).T2LagPosition == 3
+            T1L3 = T1L3 + 1;
+        elseif dataOri(i).T2LagPosition == 4
+            T1L4 = T1L4 + 1;
+        elseif dataOri(i).T2LagPosition == 5
+            T1L5 = T1L5 + 1;
+        elseif dataOri(i).T2LagPosition == 6
+            T1L6 = T1L6 + 1;
+        elseif dataOri(i).T2LagPosition == 7
+            T1L7 = T1L7 + 1;
+        elseif dataOri(i).T2LagPosition == 8
+            T1L8 = T1L8 + 1;
+        end
+    end
+    if dataOri(i).T2Correct == 1
+        if dataOri(i).T2LagPosition == 1
+            T2L1 = T2L1 + 1;
+        elseif dataOri(i).T2LagPosition == 2
+            T2L2 = T2L2 + 1;
+        elseif dataOri(i).T2LagPosition == 3
+            T2L3 = T2L3 + 1;
+        elseif dataOri(i).T2LagPosition == 4
+            T2L4 = T2L4 + 1;
+        elseif dataOri(i).T2LagPosition == 5
+            T2L5 = T2L5 + 1;
+        elseif dataOri(i).T2LagPosition == 6
+            T2L6 = T2L6 + 1;
+        elseif dataOri(i).T2LagPosition == 7
+            T2L7 = T2L7 + 1;
+        elseif dataOri(i).T2LagPosition == 8
+            T2L8 = T2L8 + 1;
+        end
+    end
+end
+dataCal.T1Accuracy_Lag1 = T1L1 / (5*TrailPerSituation);
+dataCal.T1Accuracy_Lag2 = T1L2 / (5*TrailPerSituation);
+dataCal.T1Accuracy_Lag3 = T1L3 / (5*TrailPerSituation);
+dataCal.T1Accuracy_Lag4 = T1L4 / (5*TrailPerSituation);
+dataCal.T1Accuracy_Lag5 = T1L5 / (5*TrailPerSituation);
+dataCal.T1Accuracy_Lag6 = T1L6 / (5*TrailPerSituation);
+dataCal.T1Accuracy_Lag7 = T1L7 / (5*TrailPerSituation);
+dataCal.T1Accuracy_Lag8 = T1L8 / (5*TrailPerSituation);
+dataCal.T2Accuracy_Lag1 = T2L1 / (5*TrailPerSituation);
+dataCal.T2Accuracy_Lag2 = T2L2 / (5*TrailPerSituation);
+dataCal.T2Accuracy_Lag3 = T2L3 / (5*TrailPerSituation);
+dataCal.T2Accuracy_Lag4 = T2L4 / (5*TrailPerSituation);
+dataCal.T2Accuracy_Lag5 = T2L5 / (5*TrailPerSituation);
+dataCal.T2Accuracy_Lag6 = T2L6 / (5*TrailPerSituation);
+dataCal.T2Accuracy_Lag7 = T2L7 / (5*TrailPerSituation);
+dataCal.T2Accuracy_Lag8 = T2L8 / (5*TrailPerSituation);
 
-
-
-
-%% 处理后数据保存 ！！！！！！！！改进：使新内容添加到下一行
+%% 处理后数据保存
 if ESC == 0 || DEBUG == 1
     save([CalFileName '.mat'], 'dataCal'); % 保存数据为.mat
     % 将结构体转换为表格
     dataCalTable = struct2table(dataCal);
     % 将表格保存为.scv
-    writetable(dataCalTable, [CalFileName '.csv'], 'Encoding', 'UTF-8');
+    writetable(dataCalTable, [CalFileName '.csv'], 'Encoding', 'UTF-8', 'WriteMode', 'append');
 end
+
