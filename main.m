@@ -1,29 +1,37 @@
-% 注意瞬脱 / Attentional Blink, AB
-% 指导语：你将会看到一系列快速变换的数字，其中会夹杂两个字母，你需要在看完这些数字和字母后，尽量准确地报告你看到的字母是什么
-% 实验刺激：T1：第一个字母；T2：第二个字母；数字刺激为20个
-% 自变量：T2LagPosition：T2相对T1的位置，1-8，8个水平
-% 无关变量：T1Position：T1出现的位置，5-9，5个水平
-% 实验次数：每个T2LagPosition X T1Position进行4次，共8*5*4=160次，分为4个block进行，每个block之间被试有自由休息时间
-% 因变量：T1正确率，T2正确率
-clear;
-clc;
 %% 定义实验参数
-ESC = 0;% 是否退出
-TrailPerSituation = 1;% 每个条件的试次(要求是4次！！！！！！！！！！！)
+% 清除现有变量
+clear;
+% 时间
 FeedBackTime = 1;% 反馈呈现时间
 TrailWaitTime = 1;% 试次间隔时间
 LetterInputTime = 0.4;% 字母输入后的延迟时间（绝对不能设为0）
 StimulusTime = 0.1;% 单个刺激呈现时间（要求是0.1s）
-DEBUG = 1;% 等于1时始终保存数据（就算退出）
+% 字号
 FontSizeCN = 40;% 提示语字号
 FontSizeStimulus = 120;% 刺激字号
 FontSizeCross = 80;% 试次间隔注视点字号
+% 文件名
 OriFileName = 'OriginalData';% 原始数据保存文件名
 CalFileName = 'CalculatedData';% 处理后数据保存文件名
+% 其他
+DEBUG = 1;% 等于1时始终保存数据（就算退出）
+TrailPerSituation = 1;% 每个条件的试次(要求是4次！！！)
 
 
 
 
+
+
+
+
+
+
+%% 实验简介
+% 注意瞬脱 / Attentional Blink, AB
+% 实验刺激：T1：第一个字母；T2：第二个字母；数字刺激为20个
+% 自变量：T2LagPosition：T2相对T1的位置，1-8，8个水平
+% 无关变量：T1Position：T1出现的位置，5-9，5个水平
+% 因变量：T1正确率，T2正确率
 
 %% 定义实验设计矩阵
 dataOri = struct("TrialNumber", [], "T1Position", [], "T2LagPosition", [],...
@@ -50,6 +58,7 @@ rest = ['请休息一下\n\n',...% 休息语
     '按任意键继续'];
 ending = ['实验结束，感谢您的参与\n\n',...% 结束语
     '按任意键退出'];
+ESC = 0;% 用于记录是否退出
 
 %% 创建刺激序列
 % 先把所有试次用数字填充
@@ -134,7 +143,6 @@ Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA'); % 设
 [xCenter, yCenter] = RectCenter(windowRect); % 获取屏幕中心坐标
 Screen('TextFont', window, 'SimHei'); % 设置字体
 KbName('UnifyKeyNames'); % 统一键盘名称
-escapeKey = KbName('ESCAPE'); % 定义退出键
 HideCursor;% 隐藏鼠标
 
 %% 显示提示和指导语
@@ -162,14 +170,14 @@ for block = 1:4
         Screen('TextSize', window, FontSizeCN);
 
         % 等待被试输入第一个字母
-        DrawFormattedText(window,double('请按你看到的第一个字母'),'center','center',[0 0 0]);
+        DrawFormattedText(window,double('请按你看到的第一个字母\n\n如果没看清请按空格键'),'center','center',[0 0 0]);
         Screen('Flip', window); % 更新屏幕
         keyCode = zeros(1, 256); % 创建一个存储按键信息的变量
         keyIsDown = 0; % 初始化变量
         while ~keyIsDown
             [keyIsDown, ~, keyCode] = KbCheck; % 检测是否有按键按下
         end
-        if keyCode(escapeKey) % 如果按了退出键
+        if keyCode(KbName('ESCAPE')) % 如果按了退出键
             ESC = 1;
             break; % 跳出循环，结束实验
         elseif keyCode(KbName(dataOri(i).T1Target)) % 如果按了T1Target
@@ -185,14 +193,14 @@ for block = 1:4
         WaitSecs(LetterInputTime);
 
         % 等待被试输入第二个字母
-        DrawFormattedText(window,double('请按你看到的第二个字母'),'center','center',[0 0 0]);
+        DrawFormattedText(window,double('请按你看到的第二个字母\n\n如果没看清请按空格键'),'center','center',[0 0 0]);
         Screen('Flip', window); % 更新屏幕
         keyCode = zeros(1, 256); % 创建一个存储按键信息的变量
         keyIsDown = 0; % 初始化变量
         while ~keyIsDown
             [keyIsDown, ~, keyCode] = KbCheck; % 检测是否有按键按下
         end
-        if keyCode(escapeKey) % 如果按了退出键
+        if keyCode(KbName('ESCAPE')) % 如果按了退出键
             ESC = 1;
             break; % 跳出循环，结束实验
         elseif keyCode(KbName(dataOri(i).T2Target)) % 如果按了T2Target
