@@ -4,7 +4,7 @@ clear;
 % 时间
 FeedBackTime = 1;% 正误反馈呈现时间
 TrailWaitTime = 1;% 试次间隔时间（注视点呈现时间）
-LetterInputTime = 0.4;% 字母输入后的延迟时间（绝对不能设为0）
+LetterInputTime = 0.4;% 字母输入后的延迟时间（显示"请稍等"的时间，绝对不能设为0）
 StimulusTime = 0.1;% 单个刺激呈现时间（要求是0.1s）
 % 字号
 FontSizeCN = 40;% 提示语字号
@@ -17,14 +17,7 @@ CalFileName = 'CalculatedData';% 处理后数据保存文件名
 DEBUG = 1;% 等于1时始终保存数据（就算退出）
 TrailPerSituation = 1;% 每个条件的试次(要求是4次！！！)
 
-
-
-
-
-
-
-
-
+%----------------------------------------------------------------------------------------%
 
 %% 实验简介
 % 注意瞬脱 / Attentional Blink, AB
