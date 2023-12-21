@@ -1,3 +1,0 @@
-Time,Gender,Age,T1Accuracy_Lag1,T2Accuracy_Lag1,T1Accuracy_Lag2,T2Accuracy_Lag2,T1Accuracy_Lag3,T2Accuracy_Lag3,T1Accuracy_Lag4,T2Accuracy_Lag4,T1Accuracy_Lag5,T2Accuracy_Lag5,T1Accuracy_Lag6,T2Accuracy_Lag6,T1Accuracy_Lag7,T2Accuracy_Lag7,T1Accuracy_Lag8,T2Accuracy_Lag8
-231212214836,1,20,0,0,0,0,0,0,0,0,0.4,0.4,0,0,0.6,0.4,0.4,0.2
-231212214938,1,21,0,0,0,0,0.2,0.2,0.2,0,0,0,0,0,0,0,0,0

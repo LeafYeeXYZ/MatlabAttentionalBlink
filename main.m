@@ -14,8 +14,9 @@ FontSizeCross = 80;% 试次间隔注视点字号
 OriFileName = 'OriginalData';% 原始数据保存文件名
 CalFileName = 'CalculatedData';% 处理后数据保存文件名
 % 其他
-DEBUG = 1;% 等于1时始终保存数据（就算退出）
-TrailPerSituation = 1;% 每个条件的试次(要求是4次！！！)
+DEBUG = 0;% 是否就算退出也保存数据（1为是，0为否）
+TrailPerSituation = 4;% 每个条件的试次(正式实验要求是4次)
+IfDataToHomework = 1;% 是否保存为需要上交的文件（1为是，0为否）
 
 %----------------------------------------------------------------------------------------%
 
@@ -29,7 +30,7 @@ TrailPerSituation = 1;% 每个条件的试次(要求是4次！！！)
 %% 定义实验设计矩阵
 dataOri = struct("TrialNumber", [], "T1Position", [], "T2LagPosition", [],...
     "T1Target", [], "T2Target", [], "T1Response", [], "T2Response", [], "T1Correct", [], "T2Correct", []);
-dataCal = struct( "Time", [], "Gender", [], "Age", [],...
+dataCal = struct( "Time", [], "Gender", [], "Age", [], "Hand", [],...
     "T1Accuracy_Lag1", [], "T2Accuracy_Lag1", [], "T1Accuracy_Lag2", [], "T2Accuracy_Lag2", [],...
     "T1Accuracy_Lag3", [], "T2Accuracy_Lag3", [], "T1Accuracy_Lag4", [], "T2Accuracy_Lag4", [],...
     "T1Accuracy_Lag5", [], "T2Accuracy_Lag5", [], "T1Accuracy_Lag6", [], "T2Accuracy_Lag6", [],...
@@ -259,6 +260,7 @@ end
 dataCal.Time = string(datetime('now','Format','yyMMddHHmmss'));
 dataCal.Gender = input('请输入您的性别(女性请输入0/男性请输入1):');
 dataCal.Age = input('请输入您的当前年龄(18/19/20/...):');
+dataCal.Hand = input('请输入您的惯用手(左手请输入0/右手请输入1):');
 T1L1 = 0;T1L2 = 0;T1L3 = 0;T1L4 = 0;T1L5 = 0;T1L6 = 0;T1L7 = 0;T1L8 = 0;
 T2L1 = 0;T2L2 = 0;T2L3 = 0;T2L4 = 0;T2L5 = 0;T2L6 = 0;T2L7 = 0;T2L8 = 0;
 for i = 1:40*TrailPerSituation
@@ -327,3 +329,9 @@ if ESC == 0 || DEBUG == 1
     writetable(dataCalTable, [CalFileName '.csv'], 'Encoding', 'UTF-8', 'WriteMode', 'append');
 end
 
+%----------------------------------------------------------------------------------------%
+
+%% 保存为需要上交的文件
+if IfDataToHomework == 1
+    DataToHomework(dataOri,Stimulus);
+end
