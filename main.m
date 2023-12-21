@@ -257,10 +257,12 @@ if ESC == 0 || DEBUG == 1
 end
 
 %% 数据处理
-dataCal.Time = string(datetime('now','Format','yyMMddHHmmss'));
-dataCal.Gender = input('请输入您的性别(女性请输入0/男性请输入1):');
-dataCal.Age = input('请输入您的当前年龄(18/19/20/...):');
-dataCal.Hand = input('请输入您的惯用手(左手请输入0/右手请输入1):');
+if ESC == 0 || DEBUG == 1
+    dataCal.Time = string(datetime('now','Format','yyMMddHHmmss'));
+    dataCal.Gender = input('请输入您的性别(女性请输入0/男性请输入1):');
+    dataCal.Age = input('请输入您的当前年龄(18/19/20/...):');
+    dataCal.Hand = input('请输入您的惯用手(左手请输入0/右手请输入1):');
+end
 T1L1 = 0;T1L2 = 0;T1L3 = 0;T1L4 = 0;T1L5 = 0;T1L6 = 0;T1L7 = 0;T1L8 = 0;
 T2L1 = 0;T2L2 = 0;T2L3 = 0;T2L4 = 0;T2L5 = 0;T2L6 = 0;T2L7 = 0;T2L8 = 0;
 for i = 1:40*TrailPerSituation
