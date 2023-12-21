@@ -332,6 +332,6 @@ end
 %----------------------------------------------------------------------------------------%
 
 %% 保存为需要上交的文件
-if IfDataToHomework == 1
+if IfDataToHomework == 1 && ESC == 0
     DataToHomework(dataOri,Stimulus);
 end
