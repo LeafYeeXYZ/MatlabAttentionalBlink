@@ -35,7 +35,9 @@ dataCal = struct( "Time", [], "Gender", [], "Age", [], "Hand", [], "T1Accuracy",
     "T1Accuracy_Lag1", [], "T2Accuracy_Lag1", [], "T1Accuracy_Lag2", [], "T2Accuracy_Lag2", [],...
     "T1Accuracy_Lag3", [], "T2Accuracy_Lag3", [], "T1Accuracy_Lag4", [], "T2Accuracy_Lag4", [],...
     "T1Accuracy_Lag5", [], "T2Accuracy_Lag5", [], "T1Accuracy_Lag6", [], "T2Accuracy_Lag6", [],...
-    "T1Accuracy_Lag7", [], "T2Accuracy_Lag7", [], "T1Accuracy_Lag8", [], "T2Accuracy_Lag8", []);
+    "T1Accuracy_Lag7", [], "T2Accuracy_Lag7", [], "T1Accuracy_Lag8", [], "T2Accuracy_Lag8", [],...% T1正确率，T2正确率
+    "T2_T1Accuracy_Lag1", [], "T2_T1Accuracy_Lag2", [], "T2_T1Accuracy_Lag3", [], "T2_T1Accuracy_Lag4", [],...
+    "T2_T1Accuracy_Lag5", [], "T2_T1Accuracy_Lag6", [], "T2_T1Accuracy_Lag7", [], "T2_T1Accuracy_Lag8", []);%在T1正确的前提下T2正确的概率
 % 刺激物序列
 StimulusLetter = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'];
 StimulusNumber = ['3', '4', '5', '6', '7', '9'];
@@ -260,6 +262,7 @@ end
 %% 数据处理
 T1L1 = 0;T1L2 = 0;T1L3 = 0;T1L4 = 0;T1L5 = 0;T1L6 = 0;T1L7 = 0;T1L8 = 0;
 T2L1 = 0;T2L2 = 0;T2L3 = 0;T2L4 = 0;T2L5 = 0;T2L6 = 0;T2L7 = 0;T2L8 = 0;
+T2T1L1 = 0;T2T1L2 = 0;T2T1L3 = 0;T2T1L4 = 0;T2T1L5 = 0;T2T1L6 = 0;T2T1L7 = 0;T2T1L8 = 0;
 T1 = 0;T2 = 0;
 for i = 1:40*TrailPerSituation
     if dataOri(i).T1Correct == 1
@@ -280,6 +283,26 @@ for i = 1:40*TrailPerSituation
             T1L7 = T1L7 + 1;
         elseif dataOri(i).T2LagPosition == 8
             T1L8 = T1L8 + 1;
+        end
+
+        if dataOri(i).T2Correct == 1
+            if dataOri(i).T2LagPosition == 1
+                T2T1L1 = T2T1L1 + 1;
+            elseif dataOri(i).T2LagPosition == 2
+                T2T1L2 = T2T1L2 + 1;
+            elseif dataOri(i).T2LagPosition == 3
+                T2T1L3 = T2T1L3 + 1;
+            elseif dataOri(i).T2LagPosition == 4
+                T2T1L4 = T2T1L4 + 1;
+            elseif dataOri(i).T2LagPosition == 5
+                T2T1L5 = T2T1L5 + 1;
+            elseif dataOri(i).T2LagPosition == 6
+                T2T1L6 = T2T1L6 + 1;
+            elseif dataOri(i).T2LagPosition == 7
+                T2T1L7 = T2T1L7 + 1;
+            elseif dataOri(i).T2LagPosition == 8
+                T2T1L8 = T2T1L8 + 1;
+            end
         end
     end
     if dataOri(i).T2Correct == 1
@@ -321,6 +344,14 @@ dataCal.T2Accuracy_Lag5 = T2L5 / (5*TrailPerSituation);
 dataCal.T2Accuracy_Lag6 = T2L6 / (5*TrailPerSituation);
 dataCal.T2Accuracy_Lag7 = T2L7 / (5*TrailPerSituation);
 dataCal.T2Accuracy_Lag8 = T2L8 / (5*TrailPerSituation);
+dataCal.T2_T1Accuracy_Lag1 = T2T1L1 / T1L1;
+dataCal.T2_T1Accuracy_Lag2 = T2T1L2 / T1L2;
+dataCal.T2_T1Accuracy_Lag3 = T2T1L3 / T1L3;
+dataCal.T2_T1Accuracy_Lag4 = T2T1L4 / T1L4;
+dataCal.T2_T1Accuracy_Lag5 = T2T1L5 / T1L5;
+dataCal.T2_T1Accuracy_Lag6 = T2T1L6 / T1L6;
+dataCal.T2_T1Accuracy_Lag7 = T2T1L7 / T1L7;
+dataCal.T2_T1Accuracy_Lag8 = T2T1L8 / T1L8;
 
 %% 处理后数据保存
 if ((ESC == 0) && (dataCal.T1Accuracy > T1AccuracyRequire)) || DEBUG == 1
