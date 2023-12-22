@@ -1,4 +1,4 @@
-%% 定义实验参数 CMPRFVVFYHCVVEHHHHLM LLLLLLLLLLLLLLLLLLLLLLLLLLLLLALUGLLLLLLLLNFSSHXQV                                      KVNQUQ 
+%% 定义实验参数           
 % 清除现有变量
 clear;
 % 时间
