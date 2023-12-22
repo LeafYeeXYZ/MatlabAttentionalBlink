@@ -1,4 +1,4 @@
-%% 定义实验参数
+%% 定义实验参数 CMPRFVVFYHCVVEHHHHLM LLLLLLLLLLLLLLLLLLLLLLLLLLLLLALUGLLLLLLLLNFSSHXQV                                      KVNQUQ 
 % 清除现有变量
 clear;
 % 时间
@@ -15,8 +15,9 @@ OriFileName = 'OriginalData';% 原始数据保存文件名
 CalFileName = 'CalculatedData';% 处理后数据保存文件名
 % 其他
 DEBUG = 0;% 是否就算退出也保存数据（1为是，0为否，与下方IFTH互相独立）
-TrailPerSituation = 4;% 每个条件的试次(正式实验要求是4次)
-IfDataToHomework = 1;% 是否保存为需要上交的文件（1为是，0为否，若中途退出则不执行）
+TrailPerSituation = 4;% 每个条件的试次(4)
+IfDataToHomework = 0;% 是否保存为需要上交的文件（1为是，0为否，若中途退出则不执行）
+T1AccuracyRequire = 0.75;% 低于此T1正确率的数据将不会保存（0.75）（除非DEBUG=1）
 
 %----------------------------------------------------------------------------------------%
 
@@ -30,7 +31,7 @@ IfDataToHomework = 1;% 是否保存为需要上交的文件（1为是，0为否�
 %% 定义实验设计矩阵
 dataOri = struct("TrialNumber", [], "T1Position", [], "T2LagPosition", [],...
     "T1Target", [], "T2Target", [], "T1Response", [], "T2Response", [], "T1Correct", [], "T2Correct", []);
-dataCal = struct( "Time", [], "Gender", [], "Age", [], "Hand", [],...
+dataCal = struct( "Time", [], "Gender", [], "Age", [], "Hand", [], "T1Accuracy", [], "T2Accuracy", [],...
     "T1Accuracy_Lag1", [], "T2Accuracy_Lag1", [], "T1Accuracy_Lag2", [], "T2Accuracy_Lag2", [],...
     "T1Accuracy_Lag3", [], "T2Accuracy_Lag3", [], "T1Accuracy_Lag4", [], "T2Accuracy_Lag4", [],...
     "T1Accuracy_Lag5", [], "T2Accuracy_Lag5", [], "T1Accuracy_Lag6", [], "T2Accuracy_Lag6", [],...
@@ -257,16 +258,12 @@ if ESC == 0 || DEBUG == 1
 end
 
 %% 数据处理
-if ESC == 0 || DEBUG == 1
-    dataCal.Time = string(datetime('now','Format','yyMMddHHmmss'));
-    dataCal.Gender = input('请输入您的性别(女性请输入0/男性请输入1):');
-    dataCal.Age = input('请输入您的当前年龄(18/19/20/...):');
-    dataCal.Hand = input('请输入您的惯用手(左手请输入0/右手请输入1):');
-end
 T1L1 = 0;T1L2 = 0;T1L3 = 0;T1L4 = 0;T1L5 = 0;T1L6 = 0;T1L7 = 0;T1L8 = 0;
 T2L1 = 0;T2L2 = 0;T2L3 = 0;T2L4 = 0;T2L5 = 0;T2L6 = 0;T2L7 = 0;T2L8 = 0;
+T1 = 0;T2 = 0;
 for i = 1:40*TrailPerSituation
     if dataOri(i).T1Correct == 1
+        T1 = T1 + 1;
         if dataOri(i).T2LagPosition == 1
             T1L1 = T1L1 + 1;
         elseif dataOri(i).T2LagPosition == 2
@@ -286,6 +283,7 @@ for i = 1:40*TrailPerSituation
         end
     end
     if dataOri(i).T2Correct == 1
+        T2 = T2 + 1;
         if dataOri(i).T2LagPosition == 1
             T2L1 = T2L1 + 1;
         elseif dataOri(i).T2LagPosition == 2
@@ -305,6 +303,8 @@ for i = 1:40*TrailPerSituation
         end
     end
 end
+dataCal.T1Accuracy = T1 / (40*TrailPerSituation);
+dataCal.T2Accuracy = T2 / (40*TrailPerSituation);
 dataCal.T1Accuracy_Lag1 = T1L1 / (5*TrailPerSituation);
 dataCal.T1Accuracy_Lag2 = T1L2 / (5*TrailPerSituation);
 dataCal.T1Accuracy_Lag3 = T1L3 / (5*TrailPerSituation);
@@ -323,7 +323,12 @@ dataCal.T2Accuracy_Lag7 = T2L7 / (5*TrailPerSituation);
 dataCal.T2Accuracy_Lag8 = T2L8 / (5*TrailPerSituation);
 
 %% 处理后数据保存
-if ESC == 0 || DEBUG == 1
+if ((ESC == 0) && (dataCal.T1Accuracy > T1AccuracyRequire)) || DEBUG == 1
+    % 人口学信息
+    dataCal.Time = string(datetime('now','Format','yyMMddHHmmss'));
+    dataCal.Gender = input('请输入您的性别(女性请输入0/男性请输入1):');
+    dataCal.Age = input('请输入您的当前年龄(18/19/20/...):');
+    dataCal.Hand = input('请输入您的惯用手(左手请输入0/右手请输入1):');
     save([CalFileName '.mat'], 'dataCal'); % 保存数据为.mat
     % 将结构体转换为表格
     dataCalTable = struct2table(dataCal);
@@ -334,6 +339,6 @@ end
 %----------------------------------------------------------------------------------------%
 
 %% 保存为需要上交的文件
-if IfDataToHomework == 1 && ESC == 0
+if IfDataToHomework == 1 && ((ESC == 0) && (dataCal.T1Accuracy > T1AccuracyRequire))
     DataToHomework(dataOri,Stimulus);
 end
